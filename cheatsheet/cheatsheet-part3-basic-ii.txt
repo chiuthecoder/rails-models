@@ -1,0 +1,56 @@
+#terminal
+bundle install
+rails g rspec:install
+
+rails g model Dojo name:string city:string state:string
+rails g model Ninja dojo:references first_name:string last_name:string
+
+rake db:migrate
+
+
+#user.rb
+class User < ActiveRecord::Base
+  EMAIL_REGEX = /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]+)\z/i
+  validates :first_name, :last_name, presence: true, length: { in: 2..20 }
+  validates :email_address, presence: true, uniqueness: { case_sensitive: false }, format: { with: EMAIL_REGEX }
+  validates :age, presence: true, numericality: { only_integer: true }
+  validates_numericality_of :age, less_than: 150
+  validates_numericality_of :age, greater_than: 10
+  before_save do
+    self.email_address.downcase!
+  end
+end
+
+#rails c
+exit
+rails c
+reload!
+
+##
+Dojo.create(name:"CodingDojo Silicon Valley", city:"San Jose", state:"CA")
+Dojo.create(name:"CodingDojo Seattle", city:"Seattle", state:"WA")
+Dojo.create(name:"CodingDojo New York", city:"New York", state:"NY")
+
+
+Dojo.create(name:"C", city:"New York", state:"NY")
+Dojo.create(name:"C", city:"New York", state:"NY").valid?
+Dojo.create(name:"C", city:"New York", state:"NY").errors
+Dojo.create(name:"C", city:"New York", state:"NY").errors.messages
+Dojo.create(name:"C", city:"New York", state:"NY").errors.full_messages
+
+Dojo.first.ninjas.new
+Dojo.first.ninjas.create(first_name: "Chiuhua",  last_name: "Chen")
+Dojo.last.ninjas.create(first_name: "Taka",  last_name: "Chen")
+Dojo.second.ninjas.create(first_name: "Yihsiu",  last_name: "Chen")
+
+Dojo.first.ninjas.create(first_name: "",  last_name: "Chen")
+
+Dojo.find(1).destroy
+Dojo.destroy_all
+
+Dojo.find(6).ninjas.order(first_name: :desc)
+Dojo.find(7).ninjas.select("first_name").order(create_at: :desc)
+Dojo.find(6).ninjas.where(first).order(first_name: :desc)
+Dojo.find(6).destroy.ninjas.destroy_all
+Dojo.find(6).ninjas.destroy_all
+

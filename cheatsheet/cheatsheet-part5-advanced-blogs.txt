@@ -1,0 +1,198 @@
+#terminal
+rails new advanced-blogs --skip-test-unit
+
+
+bundle install
+rails g rspec:install
+
+
+rails g model Blog name:string description:text
+rails g model Post title:string  content:text blog:references user:references
+#rails g model Post title:string  content:text blog:references user:references --force
+rails g model Message author:string message:text post:references user:references
+#rails g model Message author:string message:text post:references user:references --force
+rails g model User first_name:string last_name:string email_address:string
+rails g model Owner user:references blog:references
+
+
+rake db:migrate
+#rake db:schema:load
+rake db:drop
+rake db:migrate
+
+#user.rb
+class User < ActiveRecord::Base
+  EMAIL_REGEX = /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]+)\z/i
+  validates :first_name, :last_name, presence: true, length: { in: 2..20 }
+  validates :email_address, presence: true, uniqueness: { case_sensitive: false }, format: { with: EMAIL_REGEX }
+  validates :age, presence: true, numericality: { only_integer: true }
+  validates_numericality_of :age, less_than: 150
+  validates_numericality_of :age, greater_than: 10
+  before_save do
+    self.email_address.downcase!
+  end
+end
+
+#rails c
+exit
+rails c
+reload!
+
+##
+User.new
+Blog.new
+Post.new
+
+User.create(first_name:"Chiuhua", last_name:"Chen", email_address: "chiu@gmail.com")
+User.create(first_name:"Taka", last_name:"Chen", email_address: "taka@gmail.com")
+User.create(first_name:"Yihsiu", last_name:"Chen", email_address: "yihsiu@gmail.com")
+User.create(first_name:"Zoe", last_name:"Smith", email_address: "zoe@gmail.com")
+User.create(first_name:"Tiger", last_name:"Ma", email_address: "tiger@gmail.com")
+
+Blog.create(name: "Coding Inside", description:"How to become a better developer?")
+Blog.create(name: "Coding Inside", description:"How to become a zen developer?")
+Blog.create(name: "Coding Inside", description:"How to be self-sufficient?")
+Blog.create(name: "Coding Inside", description:"How to create responsive layout")
+Blog.create(name: "Coding Inside", description:"How to implement group chat using socket.io?")
+Blog.create(name: "Baking Inside", description:"How to make pat a choux?")
+Blog.create(name: "Baking Inside", description:"How to make lady fingers?")
+
+User.first.blogs.create(name: "Coding Inside", description:"How to become a better developer?")
+User.first.blogs.create(name: "Coding Inside", description:"How to become a zen developer?")
+User.first.blogs.create(name: "Coding Inside", description:"How to become a best developer?")
+
+User.second.owners.new
+User.find(2).blogs.create(name: "Baking Inside", description:"How to make pat a choux?")
+User.last.blogs.create(name: "Baking Inside", description:"How to make lady fingers?")
+# User.third.owners.create(blog: Blog.all)
+# User.third.owners.create(blog: )
+User.third.owners.create(blog_id: 2)
+Owner.create(user_id: 3, blog_id: 1)
+
+User.second.blogs.create(name: "Coding Inside", description:"How to become a zen developer?")
+User.third.blogs.create(name: "Coding Inside", description:"How to create responsive layout")
+
+Post.create(user: User.find(1), blog: Blog.find(2), title: "a Zen way", content: "It requires disciplines.")
+Post.create(user: User.first, blog: Blog.find(2), title: "does it work?", content: "It requires disciplines.")
+Post.create(user: User.first, blog: Blog.find(2), title: "a dummy way", content: "It requires disciplines.")
+
+Post.create(user: User.find(2), blog: Blog.last, title: "a franch way", content: "Need to follow step by step")
+Post.create(user: User.find(2), blog: Blog.last, title: "a chinese way", content: "Yam")
+Post.create(user: User.find(2), blog: Blog.last, title: "my way", content: "Yam")
+Post.create(user: User.find(2), blog: Blog.last, title: "a dummy way", content: "bas")
+Post.create(user: User.find(2), blog: Blog.last, title: "a free style way", content: "Not so good")
+
+Post.create(user: User.find(3), blog: Blog.last, title: "a franch way", content: "Need to follow step by step")
+Post.create(user: User.find(3), blog: Blog.first, title: "a chinese way", content: "Love it!")
+Post.create(user: User.find(3), blog: Blog.second, title: "a home-made way", content: "Yammy!")
+
+User.find(3).posts
+
+Message.create(user: User.find(3), post: Post.first, message: "I love it. My favior pastry!!")
+Message.create(user: User.find(3), post: Post.first, message: "But watch out. You don't want to gain too much weights")
+
+Message.create(user: User.find(3), post: Post.second, message: "I love it. My favior pastry!!")
+Message.create(user: User.find(3), post: Post.second, message: "But watch out. You don't want to gain too much weights")
+User.find(3).messages
+
+Message.create(user: User.find(4), post: Post.last, message: "Is a home-made way really the best way? Why not just buy it from Cafe Besalu.")
+Message.create(user: User.find(4), post: Post.last, message: "Is a home-made way really the best way? I have no time to make it.")
+Message.create(user: User.find(4), post: Post.last, message: "Well...I'll eat it all")
+User.find(4).messages
+
+
+Post.find(2).update(user: User.last)
+Post.find(2).update(content: "You never know until you try it.")
+
+User.find(3).blogs
+User.find(3).messages
+
+Blog.first.owners
+Blog.first.owners.update(user: User.find(2))
+
+
+#Retrieve all posts associated with the first blog as well as who left these posts. 
+Blog.first.posts
+
+#Retrieve all messages associated with the first blog along with all the user information of those who left the messages.
+# Dojo.find(7).ninjas.select("first_name").order(create_at: :desc)
+# Blog.find(2)
+Blog.find(2).messages.joins(:user).select("*")
+
+
+#Grab all user information of those that own the first blog (make this work by allowing Blog.first.owners to work).
+Blog.first.owners
+
+#Change it so that the first blog is no longer owned by the first user.
+
+
+
+
+# User.first.owners.new
+# User.first.owners.create(blog: Blog.first)
+# User.first.owners.create(blog: Blog.find(2))
+# User.first.owners.create(blog: Blog.second)
+# User.first.owners.create(blog: Blog.third)
+# User.first.owners.create(blog: Blog.last)
+
+# User.first.owners.all? { |e|  }
+
+# User.find(2).owners.new
+# User.find(2).owners.create(blog: Blog.find(4))
+# User.last.owners.create(blog: Blog.find(5))
+# User.find(3).
+
+# Blog.first.posts.new
+# Blog.first.posts.create(title:"Top tips to become better developer", content:"Be consistent, never give up")
+# Blog.first.posts.create(title:"Good developer vs Bad developer", content:"One works as she can, the other just get thing done.")
+
+
+# Blog.second.posts.create(title:"10 rules-Part1", content:"Programmers are wanted people.")
+# Blog.second.posts.create(title:"10 rules-Part2", content:"we can say 'No' and we have our lives in our own hands.")
+
+# Blog.third.posts.create(title:"10 rules-Part1", content:"Steps 123")
+# Blog.third.posts.create(title:"10 rules-Part2", content:"we can say 'No'.")
+
+# Blog.forth.posts.create(title:"Top tips", content:"fssf")
+# Blog.forth.posts.create(title:"Top 5 tips", content:"sfsfsf'.")
+
+# Blog.last.posts.create(title:"Top 10", content:"Steps 123")
+# Blog.last.posts.create(title:"Tiger && Fox", content:"we can say 'No'.")
+
+# Post.all
+# Message.new
+# Post.first.messages.new
+# Post.first.messages.create(author:"Chiuhua Chen", message: "It's going to be a long journey!")
+# Post.first.messages.create(author:"Taka Chen", message: "I will support you no matter what.")
+
+# Post.second.messages.create(author:"Fox Smith", message: "Good Luck!")
+# Post.second.messages.create(author:"Taka Chen", message: "I see, I'll give it a try in my dream.")
+
+
+# Post.third.messages.create(author:"Fox Smith", message: "Good Luck!")
+# Post.third.messages.create(author:"Taka Chen", message: "I see, I'll give it a try in my dream.")
+
+# Post.all
+# Blog.first.posts
+# Blog.last.posts
+# Blog.last.posts(title: :desc)
+# Post.first.update(title: "Top 5 tips")
+
+
+# #post.rb
+# has_many :messages, :dependent => :delete_all
+
+# Post.third.destory
+
+
+# Blog.where("id < ?", 5)
+# User.where("id > ?", 200) 
+
+
+
+# Dojo.find(1).destroy
+# Dojo.destroy_all
+
+# Dojo.find(6).ninjas.order(first_name: :desc)
+# Dojo.find(6).ninjas.destroy_all
+

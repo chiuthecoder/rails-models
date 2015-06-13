@@ -1,0 +1,44 @@
+#in terminal
+#reuse erverythinf from the advanced project
+rails g model Friendship user:references friend_id:integer
+# or
+rails g model Friendship user:references friend_id:integer --force
+
+rake db:migrate
+
+##run, rollbacl to rollback one step forward
+rake db:rollback
+rake db:migrate
+
+## important notes, 
+## modify the following 2 .rb files
+## riendship.rb
+class Friendship < ActiveRecord::Base
+  belongs_to :user
+  belongs_to :friend, class_name: "User"
+end
+
+## user.rb
+class User < ActiveRecord::Base
+  has_many :posts
+  has_many :messages
+  has_many :owners
+  has_many :blogs, :through => :owners
+  #ploymorphism
+  has_many :comments, :as => :commentable
+  #friendships
+  has_many :friendships
+  has_many :friends, foreign_key: "friend_id", class_name: "User", through: :friendships
+end
+
+#in rails console
+# friendship
+reload!
+Friendship.new
+
+User.first.friends
+User.first.friendships.create(friend: User.last)
+User.find(5).friendships.create(friend: User.last)
+User.find(5).friendships.create(friend: User.last)
+User.find(2).friendships.create(friend: User.first)
+

@@ -1,0 +1,70 @@
+gem install rails
+
+rails new test_project
+rails server
+
+rails c
+
+//inside Gemfile-
+//gem 'bcrypt', '~> 3.1.7'
+//#for rails console
+//gem 'hirb'
+
+
+bundle install
+bundle show
+
+rails g model User
+rails g model User first_name:string last_name:string email:string 
+
+//use --force to replace
+rails g model User first_name:string last_name:string email:string password:string age:integer --force
+
+//the migrations are a way to grow/change your database schema over time, 
+//so once a migration file is created we need to migrate it to our database.
+rake db:migrate
+
+
+rails c
+User.new
+user1 = User.new
+
+
+
+User.create(first_name:"Cow", last_name:"Smith", email:"cow@gmail.com", age:17)
+
+User.create(first_name:"Jon", last_name:"Stark", email:"jon@thewall.com", age:17)
+User.create(first_name:"jj", last_name:"S", email:"jj@thewall.com", age:17)
+
+cat = User.new(first_name:"c", last_name:"Smith", email:"cat@gmail.com", age:7)
+snake = User.new(last_name:"Chen")
+goat = User.new(first_name:"goat", last_name:"Smith", email:"goat")
+
+fox = User.new(last_name:"Smith", email:"fox")
+fox2 = User.new(first_name:"Smith"， last_name:"Smith", email:"fox")
+
+//Relationships
+rails g model Product name:string price:float description:text user:references
+
+
+User.first.products.new
+User.first.products.create(name: "iPad1", price:"199.99", description:"Used, but hey it still works")
+User.first.products.create(name: "Wii", price:"199.99", description:"Used, but hey it still works")
+User.first.products.create(name: "Xbox", price:"209.99", description:"Used, but hey it still works")
+
+
+User.last.products.create(name: "Xbox", price:"209.99", description:"Used, but hey it still works")
+
+
+User.last.products.create(name: "iMac", price:"199.99", description:"Used, but hey it still works")
+
+
+rails g model Messsage content:text user:references
+rails g model Product message:text user:references
+
+rake db:migrate
+
+lion.valid?
+lion.errors.full_messages
+
+Message.new
